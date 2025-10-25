@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import client, { createSession } from "../nakamaClient";
 import { useParams } from "react-router-dom";
+import { calculateWinner, isBoardFull } from "../utils/gameUtils"; // Adjust path as needed
 
 function PrivateRoom() {
   const { id } = useParams();
@@ -10,6 +11,8 @@ function PrivateRoom() {
   const [mySymbol, setMySymbol] = useState<string>("");
   const [whosNext, setWhosNext] = useState<string>("");
   const [board, setBoard] = useState(Array(9).fill(null));
+  const [winner, setWinner] = useState<string | null>(null);
+  const [gameOver, setGameOver] = useState<boolean>(false);
 
   const socketRef = useRef<any>(null);
   const matchRef = useRef<any>(null);
@@ -28,11 +31,26 @@ function PrivateRoom() {
 
       socket.onmatchdata = (matchData: any) => {
         console.log("Received match data", matchData);
-        // Decode and update board when opponent moves
+
         const decoder = new TextDecoder();
         const dataString = decoder.decode(matchData.data);
         const { board: opponentBoard } = JSON.parse(dataString);
         setBoard(opponentBoard);
+
+        const gameWinner = calculateWinner(opponentBoard);
+        if (gameWinner) {
+          setWinner(gameWinner);
+          setGameOver(true);
+          setStatus(gameWinner === "X" ? "You Won! 🎉" : "Opponent Won!");
+          return;
+        }
+
+        if (isBoardFull(opponentBoard)) {
+          setGameOver(true);
+          setStatus("It's a Draw!");
+          return;
+        }
+
         setWhosNext("X");
         setStatus("Your Turn!");
       };
@@ -72,13 +90,28 @@ function PrivateRoom() {
 
   const handleClick = (index: number) => {
     console.log(board[index]);
-    if (!matchRef.current || !socketRef.current || board[index]) return;
+    if (!matchRef.current || !socketRef.current || board[index] || gameOver)
+      return;
 
     const newBoard = [...board];
     newBoard[index] = mySymbol;
     setBoard(newBoard);
-    setStatus("Opponent's Turn");
 
+    // Check for winner after your move
+    const gameWinner = calculateWinner(newBoard);
+    if (gameWinner) {
+      setWinner(gameWinner);
+      setGameOver(true);
+      setStatus("You Won! 🎉");
+    } else if (isBoardFull(newBoard)) {
+      setGameOver(true);
+      setStatus("It's a Draw!");
+    } else {
+      setStatus("Opponent's Turn");
+      setWhosNext("O");
+    }
+
+    // Send the move to opponent
     const data = JSON.stringify({
       board: newBoard,
     });
@@ -95,10 +128,9 @@ function PrivateRoom() {
         },
       });
 
-      console.log("CHECKING WHETHER SENT OR NOT");
-      setWhosNext("O");
+      console.log("Move sent successfully");
     } catch (error) {
-      setStatus("Failed to send your move datas");
+      setStatus("Failed to send your move");
     }
   };
 
@@ -131,13 +163,12 @@ function PrivateRoom() {
               cursor: "pointer",
               backgroundColor: cell ? "#e0e0e0" : "white",
             }}
-            disabled={whosNext === "O"}
+            disabled={whosNext === "O" || gameOver}
           >
             {cell}
           </button>
         ))}
       </div>
-      {/* <p>Next Player: {isXNext ? mySymbol : mySymbol === "X" ? "O" : "X"}</p> */}
     </div>
   );
 }

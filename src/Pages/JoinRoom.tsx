@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import client, { createSession } from "../nakamaClient";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { calculateWinner, isBoardFull } from "../utils/gameUtils"; // Adjust path as needed
 
 function JoinRoom() {
   const { id } = useParams();
@@ -12,6 +13,8 @@ function JoinRoom() {
   const [mySymbol, setMySymbol] = useState<string>("");
   const [whosNext, setWhosNext] = useState<string>("");
   const [board, setBoard] = useState(Array(9).fill(null));
+  const [winner, setWinner] = useState<string | null>(null);
+  const [gameOver, setGameOver] = useState<boolean>(false);
 
   const socketRef = useRef<any>(null);
   const sessionRef = useRef<any>(null);
@@ -51,6 +54,23 @@ function JoinRoom() {
         const dataString = decoder.decode(matchData.data);
         const { board: opponentBoard } = JSON.parse(dataString);
         setBoard(opponentBoard);
+
+        // Check for winner after opponent's move
+        const gameWinner = calculateWinner(opponentBoard);
+        if (gameWinner) {
+          setWinner(gameWinner);
+          setGameOver(true);
+          setStatus(gameWinner === "O" ? "You Won! 🎉" : "Opponent Won!");
+          return;
+        }
+
+        // Check for draw
+        if (isBoardFull(opponentBoard)) {
+          setGameOver(true);
+          setStatus("It's a Draw!");
+          return;
+        }
+
         setWhosNext("O");
         setStatus("Your Turn!");
       };
@@ -88,13 +108,28 @@ function JoinRoom() {
 
   const handleClick = (index: number) => {
     console.log(board[index]);
-    if (!matchRef.current || !socketRef.current || board[index]) return;
+    if (!matchRef.current || !socketRef.current || board[index] || gameOver)
+      return;
 
     const newBoard = [...board];
     newBoard[index] = mySymbol;
     setBoard(newBoard);
-    setStatus("Opponent's Turn");
 
+    // Check for winner after your move
+    const gameWinner = calculateWinner(newBoard);
+    if (gameWinner) {
+      setWinner(gameWinner);
+      setGameOver(true);
+      setStatus("You Won! 🎉");
+    } else if (isBoardFull(newBoard)) {
+      setGameOver(true);
+      setStatus("It's a Draw!");
+    } else {
+      setStatus("Opponent's Turn");
+      setWhosNext("X");
+    }
+
+    // Send the move to opponent
     const data = JSON.stringify({
       board: newBoard,
     });
@@ -110,9 +145,8 @@ function JoinRoom() {
           data: encodedData,
         },
       });
-      setWhosNext("X");
     } catch (error) {
-      setStatus("Failed to send your move datas");
+      setStatus("Failed to send your move");
     }
   };
 
@@ -120,7 +154,7 @@ function JoinRoom() {
     <div style={{ textAlign: "center", fontFamily: "sans-serif" }}>
       <h1>Tic Tac Toe</h1>
       <p>{status}</p>
-      <p>which one {whosNext}</p>
+      <p>Next to play: {whosNext}</p>
       {mySymbol && (
         <p>
           You are: <strong>{mySymbol}</strong>
@@ -145,13 +179,12 @@ function JoinRoom() {
               cursor: "pointer",
               backgroundColor: cell ? "#e0e0e0" : "white",
             }}
-            disabled={whosNext === "X"}
+            disabled={whosNext === "X" || gameOver}
           >
             {cell}
           </button>
         ))}
       </div>
-      {/* <p>Next Player: {isXNext ? mySymbol : mySymbol === "X" ? "O" : "X"}</p> */}
     </div>
   );
 }
