@@ -14,6 +14,7 @@ function JoinRoom() {
   const [board, setBoard] = useState(Array(9).fill(null));
 
   const socketRef = useRef<any>(null);
+  const sessionRef = useRef<any>(null);
 
   console.log(whosNext);
   const matchRef = useRef<any>(null);
@@ -23,13 +24,28 @@ function JoinRoom() {
       const userSession: any = await createSession(
         "player_" + Math.floor(Math.random() * 10000)
       );
+      console.log("1. Session immediately after creation:", userSession);
+      console.log("1. Username:", userSession.username);
+
       setSession(userSession);
+      sessionRef.current = userSession;
+
+      console.log("2. Session stored in ref:", sessionRef.current);
+      console.log("2. Username in ref:", sessionRef.current.username);
+
       setStatus("Authenticated...");
 
       const socket = client.createSocket(false, false);
 
       socket.onmatchdata = (matchData: any) => {
-        console.log("Received match data", matchData);
+        console.log("COMING DATA", matchData);
+        console.log("LOCAL DATA", sessionRef.current);
+        console.log("LOCAL DATA 2", userSession);
+        if (matchData.presence.username === sessionRef?.current.username) {
+          console.log("Ignoring own message");
+          return;
+        }
+
         // Decode and update board when opponent moves
         const decoder = new TextDecoder();
         const dataString = decoder.decode(matchData.data);
@@ -86,8 +102,6 @@ function JoinRoom() {
     const encoder = new TextEncoder();
     const encodedData = encoder.encode(data);
 
-    console.log("ENCODED DATA", encodedData);
-
     try {
       socketRef.current.send({
         match_data_send: {
@@ -106,6 +120,7 @@ function JoinRoom() {
     <div style={{ textAlign: "center", fontFamily: "sans-serif" }}>
       <h1>Tic Tac Toe</h1>
       <p>{status}</p>
+      <p>which one {whosNext}</p>
       {mySymbol && (
         <p>
           You are: <strong>{mySymbol}</strong>

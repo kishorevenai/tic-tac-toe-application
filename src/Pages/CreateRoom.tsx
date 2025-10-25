@@ -131,7 +131,7 @@ function PrivateRoom() {
               cursor: "pointer",
               backgroundColor: cell ? "#e0e0e0" : "white",
             }}
-            // disabled={whosNext === "O"}
+            disabled={whosNext === "O"}
           >
             {cell}
           </button>
