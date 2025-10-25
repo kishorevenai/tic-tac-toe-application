@@ -1,0 +1,144 @@
+import { useEffect, useRef, useState } from "react";
+import client, { createSession } from "../nakamaClient";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+function JoinRoom() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [session, setSession] = useState<any>(null);
+  const [status, setStatus] = useState<any>(null);
+  const [mySymbol, setMySymbol] = useState<string>("");
+  const [whosNext, setWhosNext] = useState<string>("");
+  const [board, setBoard] = useState(Array(9).fill(null));
+
+  const socketRef = useRef<any>(null);
+
+  console.log(whosNext);
+  const matchRef = useRef<any>(null);
+
+  async function init() {
+    try {
+      const userSession: any = await createSession(
+        "player_" + Math.floor(Math.random() * 10000)
+      );
+      setSession(userSession);
+      setStatus("Authenticated...");
+
+      const socket = client.createSocket(false, false);
+
+      socket.onmatchdata = (matchData: any) => {
+        console.log("Received match data", matchData);
+        // Decode and update board when opponent moves
+        const decoder = new TextDecoder();
+        const dataString = decoder.decode(matchData.data);
+        const { board: opponentBoard } = JSON.parse(dataString);
+        setBoard(opponentBoard);
+        setWhosNext("O");
+        setStatus("Your Turn!");
+      };
+
+      socket.onmatchpresence = (presence: any) => {
+        console.log("Match presence updated", presence);
+      };
+
+      await socket.connect(userSession, true);
+      socketRef.current = socket;
+
+      // Use the ID from URL params directly
+      console.log("Attempting to join match:", id);
+      const match = await socket.joinMatch(id);
+      console.log("Joined Match:", match);
+      matchRef.current = match.match_id;
+      setMySymbol("O");
+      setWhosNext("X"); // X goes first
+      setStatus("Joined! Waiting for opponent's move...");
+    } catch (error) {
+      console.error("Error joining match:", error);
+      navigate("/");
+    }
+  }
+
+  useEffect(() => {
+    init();
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, []);
+
+  const handleClick = (index: number) => {
+    console.log(board[index]);
+    if (!matchRef.current || !socketRef.current || board[index]) return;
+
+    const newBoard = [...board];
+    newBoard[index] = mySymbol;
+    setBoard(newBoard);
+    setStatus("Opponent's Turn");
+
+    const data = JSON.stringify({
+      board: newBoard,
+    });
+
+    const encoder = new TextEncoder();
+    const encodedData = encoder.encode(data);
+
+    console.log("ENCODED DATA", encodedData);
+
+    try {
+      socketRef.current.send({
+        match_data_send: {
+          match_id: matchRef.current,
+          op_code: 1,
+          data: encodedData,
+        },
+      });
+      setWhosNext("X");
+    } catch (error) {
+      setStatus("Failed to send your move datas");
+    }
+  };
+
+  return (
+    <div style={{ textAlign: "center", fontFamily: "sans-serif" }}>
+      <h1>Tic Tac Toe</h1>
+      <p>{status}</p>
+      {mySymbol && (
+        <p>
+          You are: <strong>{mySymbol}</strong>
+        </p>
+      )}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 100px)",
+          gap: "5px",
+          justifyContent: "center",
+        }}
+      >
+        {board.map((cell, i) => (
+          <button
+            key={i}
+            onClick={() => handleClick(i)}
+            style={{
+              width: "100px",
+              height: "100px",
+              fontSize: "2rem",
+              cursor: "pointer",
+              backgroundColor: cell ? "#e0e0e0" : "white",
+            }}
+            disabled={whosNext === "X"}
+          >
+            {cell}
+          </button>
+        ))}
+      </div>
+      {/* <p>Next Player: {isXNext ? mySymbol : mySymbol === "X" ? "O" : "X"}</p> */}
+    </div>
+  );
+}
+
+export default JoinRoom;
