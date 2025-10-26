@@ -22,6 +22,10 @@ function JoinRoom() {
   console.log(whosNext);
   const matchRef = useRef<any>(null);
 
+  const handleRouteToHome = () => {
+    navigate("/");
+  };
+
   async function init() {
     try {
       const userSession: any = await createSession(
@@ -155,6 +159,9 @@ function JoinRoom() {
       <h1>Tic Tac Toe</h1>
       <p>{status}</p>
       <p>Next to play: {whosNext}</p>
+      {gameOver && (
+        <button onClick={handleRouteToHome}>Back to home page</button>
+      )}
       {mySymbol && (
         <p>
           You are: <strong>{mySymbol}</strong>
@@ -178,8 +185,9 @@ function JoinRoom() {
               fontSize: "2rem",
               cursor: "pointer",
               backgroundColor: cell ? "#e0e0e0" : "white",
+              color: cell === "X" ? "red" : cell === "O" ? "blue" : "black",
             }}
-            disabled={whosNext === "X" || gameOver}
+            disabled={whosNext === "O" || gameOver}
           >
             {cell}
           </button>

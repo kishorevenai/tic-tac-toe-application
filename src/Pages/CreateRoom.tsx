@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import client, { createSession } from "../nakamaClient";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { calculateWinner, isBoardFull } from "../utils/gameUtils"; // Adjust path as needed
 
 function PrivateRoom() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [session, setSession] = useState<any>(null);
   const [status, setStatus] = useState<any>(null);
@@ -16,6 +17,10 @@ function PrivateRoom() {
 
   const socketRef = useRef<any>(null);
   const matchRef = useRef<any>(null);
+
+  const handleRouteToHome = () => {
+    navigate("/");
+  };
 
   async function init() {
     try {
@@ -139,6 +144,9 @@ function PrivateRoom() {
       <h1>Tic Tac Toe</h1>
       <p>{status}</p>
       <p>ROOM ID: {matchRef.current}</p>
+      {gameOver && (
+        <button onClick={handleRouteToHome}>Back to home page</button>
+      )}
       {mySymbol && (
         <p>
           You are: <strong>{mySymbol}</strong>
@@ -162,6 +170,7 @@ function PrivateRoom() {
               fontSize: "2rem",
               cursor: "pointer",
               backgroundColor: cell ? "#e0e0e0" : "white",
+              color: cell === "X" ? "red" : cell === "O" ? "blue" : "black",
             }}
             disabled={whosNext === "O" || gameOver}
           >
