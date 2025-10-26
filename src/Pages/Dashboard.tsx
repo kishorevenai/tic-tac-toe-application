@@ -17,6 +17,16 @@ const Dashboard = () => {
     navigate(`/private-room/${roomIdentifier}`);
   };
 
+  const handleRandomRoom = () => {
+    // Generate a random room identifier for the URL
+    const roomIdentifier = `room_${Date.now()}`;
+    navigate(`/random-room/${roomIdentifier}`);
+  };
+
+  const handleListMatches = () => {
+    navigate("/list-rooms");
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <h2>Tic Tac Toe Multiplayer</h2>
@@ -38,6 +48,16 @@ const Dashboard = () => {
           style={{ marginRight: "10px", padding: "5px" }}
         />
         <button onClick={handleJoinRoom}>Join Room</button>
+      </div>
+
+      <div>
+        <h3>Join Random</h3>
+        <button onClick={handleRandomRoom}>Join Random Room</button>
+      </div>
+
+      <div>
+        <h3>List Rooms</h3>
+        <button onClick={handleListMatches}>List all Room</button>
       </div>
     </div>
   );
