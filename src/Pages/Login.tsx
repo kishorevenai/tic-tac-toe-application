@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import client from "../nakamaClient";
 import { useNavigate } from "react-router-dom";
 
@@ -6,46 +6,83 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
+  const [displayName, setDisplayName] = useState<string>("");
+  const [existingUser, setExistingUser] = useState(false); // track if user exists
+  const [isChecked, setIsChecked] = useState(false);
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Optional: restore session if token exists
+    const token = localStorage.getItem("nakamaToken");
+    if (!token) return;
+
+    try {
+      const restoredSession = client.restoreSession(token);
+      if (restoredSession && !restoredSession.isexpired(Date.now() / 1000)) {
+        fetchExistingUserData(restoredSession);
+      }
+    } catch (err) {
+      console.log("Failed to restore session", err);
+    }
+  }, []);
+
+  async function fetchExistingUserData(session) {
+    try {
+      const account = await client.getAccount(session);
+      if (account.display_name) {
+        setDisplayName(account.display_name);
+        setExistingUser(true); // mark as existing user
+      }
+    } catch (err) {
+      console.log("No existing user data", err);
+    }
+  }
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsChecked(e.target.checked);
+    console.log("Checkbox checked:", e.target.checked);
+  };
 
   async function loginOrCreate(email: string, password: string) {
     try {
       setStatus("Logging in...");
-      const session = await client.authenticateEmail(
-        email,
-        password,
-        create: false,
-      );
-      console.log("Logged in existing user:", session);
+      // Attempt login first
+
+      let session: any;
+
+      if (isChecked) {
+        session = await client.authenticateEmail(email, password, false);
+      } else {
+        session = await client.authenticateEmail(email, password, true);
+        await client.updateAccount(session, { display_name: displayName });
+      }
+
+      // Don't overwrite display name if existing
+      localStorage.setItem("nakamaSession", session);
       localStorage.setItem("nakamaToken", session.token);
       setStatus("Login successful!");
+      setExistingUser(true); // mark as existing user
       navigate("/dashboard");
       return session;
     } catch (error) {
-      console.log("User not found, creating new one...");
-      try {
-        const session = await client.authenticateEmail({
-          email,
-          password,
-          create: true,
-        });
-        console.log("New user created:", session);
-        localStorage.setItem("nakamaToken", session.token);
-        setStatus("Account created successfully!");
-        navigate("/dashboard");
-        return session;
-      } catch (err) {
-        console.error("Failed to login or create account:", err);
-        setStatus("Login failed. Please try again.");
-      }
+      console.error("Failed to login or create account:", error);
+      setStatus("Failed to login, Please check your credentials.");
     }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      setStatus("Please enter both email and password.");
-      return;
+    if (isChecked) {
+      if (!email || !password) {
+        setStatus("Please enter all the fields.");
+        return;
+      }
+    } else {
+      if (!email || !password || !displayName) {
+        setStatus("Please enter all the fields.");
+        return;
+      }
     }
     loginOrCreate(email, password);
   };
@@ -53,6 +90,7 @@ const Login = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen gap-4">
       <h2 className="text-2xl font-semibold">Login / Sign Up</h2>
+
       <form
         onSubmit={handleSubmit}
         className="flex flex-col gap-3 p-4 bg-gray-100 rounded-lg w-80"
@@ -71,13 +109,35 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           className="border p-2 rounded"
         />
+
+        {/* Show display name input only for new users */}
+        {!isChecked && (
+          <input
+            type="text"
+            placeholder="Display Name"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            className="border p-2 rounded"
+          />
+        )}
+
         <button
           type="submit"
           className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
         >
           Login / Create Account
         </button>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={isChecked}
+            onChange={handleCheckboxChange}
+          />
+          Already a user ?.
+        </label>
       </form>
+
       <p className="text-gray-600">{status}</p>
     </div>
   );

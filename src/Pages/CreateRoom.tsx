@@ -7,7 +7,9 @@ function PrivateRoom() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<any>(
+    localStorage.getItem("nakamaSession")
+  );
   const [status, setStatus] = useState<any>(null);
   const [mySymbol, setMySymbol] = useState<string>("");
   const [whosNext, setWhosNext] = useState<string>("");
