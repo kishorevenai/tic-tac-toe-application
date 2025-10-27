@@ -32,13 +32,14 @@ function PrivateRoom() {
       setSession(userSession);
       setStatus("Authenticated...");
 
+      console.log("CHECKING FIRST BOTH", userSession);
+      console.log("CHECKING SECOND BOTH", JSON.parse(session));
+
       const socket = client.createSocket(false, false);
       await socket.connect(userSession, true);
       socketRef.current = socket;
 
       socket.onmatchdata = (matchData: any) => {
-        console.log("Received match data", matchData);
-
         const decoder = new TextDecoder();
         const dataString = decoder.decode(matchData.data);
         const { board: opponentBoard } = JSON.parse(dataString);
@@ -63,7 +64,6 @@ function PrivateRoom() {
       };
 
       socket.onmatchpresence = (presence: any) => {
-        console.log("SOMEONE JOINED", presence);
         if (presence.joins && presence.joins.length > 0) {
           // Small delay to ensure joiner is ready
           setTimeout(() => {
@@ -74,7 +74,7 @@ function PrivateRoom() {
 
       // Create match WITHOUT passing any name parameter
       const match = await socket.createMatch();
-      console.log("MATCH CREATED", match);
+
       matchRef.current = match.match_id;
       setMySymbol("X");
       setWhosNext("X");
@@ -115,7 +115,6 @@ function PrivateRoom() {
   }, []);
 
   const handleClick = (index: number) => {
-    console.log(board[index]);
     if (!matchRef.current || !socketRef.current || board[index] || gameOver)
       return;
 
@@ -161,8 +160,6 @@ function PrivateRoom() {
           data: encodedData,
         },
       });
-
-      console.log("Move sent successfully");
     } catch (error) {
       setStatus("Failed to send your move");
     }

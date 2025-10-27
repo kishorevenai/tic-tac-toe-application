@@ -8,7 +8,9 @@ function JoinRoom() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<any>(
+    localStorage.getItem("nakamaSession")
+  );
   const [status, setStatus] = useState<any>(null);
   const [mySymbol, setMySymbol] = useState<string>("");
   const [whosNext, setWhosNext] = useState<string>("");
@@ -31,14 +33,8 @@ function JoinRoom() {
       const userSession: any = await createSession(
         "player_" + Math.floor(Math.random() * 10000)
       );
-      console.log("1. Session immediately after creation:", userSession);
-      console.log("1. Username:", userSession.username);
-
       setSession(userSession);
       sessionRef.current = userSession;
-
-      console.log("2. Session stored in ref:", sessionRef.current);
-      console.log("2. Username in ref:", sessionRef.current.username);
 
       setStatus("Authenticated...");
 
@@ -81,7 +77,7 @@ function JoinRoom() {
         console.log("Match presence updated", presence);
       };
 
-      await socket.connect(userSession, true);
+      await socket.connect(JSON.parse(session), true);
       socketRef.current = socket;
 
       // Use the ID from URL params directly

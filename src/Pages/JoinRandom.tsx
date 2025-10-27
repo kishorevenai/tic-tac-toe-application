@@ -18,7 +18,7 @@ function RandomRoom() {
   const ticketRef = useRef("");
 
   const handleRouteToHome = () => {
-    navigate("/");
+    navigate("/dashboard");
   };
 
   async function init() {
@@ -119,7 +119,7 @@ function RandomRoom() {
     } catch (error) {
       console.error("❌ Error in matchmaking:", error);
       setStatus("Failed to connect. Please try again.");
-      setTimeout(() => navigate("/"), 3000);
+      setTimeout(() => navigate("/dashboard"), 3000);
     }
   }
 

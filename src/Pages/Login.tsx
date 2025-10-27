@@ -8,7 +8,7 @@ const Login = () => {
   const [status, setStatus] = useState("");
   const [displayName, setDisplayName] = useState<string>("");
   const [existingUser, setExistingUser] = useState(false); // track if user exists
-  const [isChecked, setIsChecked] = useState(false);
+  const [isChecked, setIsChecked] = useState(true);
 
   const navigate = useNavigate();
 
@@ -40,8 +40,8 @@ const Login = () => {
   }
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsChecked(e.target.checked);
-    console.log("Checkbox checked:", e.target.checked);
+    e.preventDefault();
+    setIsChecked((prev) => !prev);
   };
 
   async function loginOrCreate(email: string, password: string) {
@@ -59,7 +59,7 @@ const Login = () => {
       }
 
       // Don't overwrite display name if existing
-      localStorage.setItem("nakamaSession", session);
+      localStorage.setItem("nakamaSession", JSON.stringify(session));
       localStorage.setItem("nakamaToken", session.token);
       setStatus("Login successful!");
       setExistingUser(true); // mark as existing user
@@ -89,7 +89,9 @@ const Login = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen gap-4">
-      <h2 className="text-2xl font-semibold">Login / Sign Up</h2>
+      <h2 className="text-2xl font-semibold">
+        {isChecked ? "Login" : "Signup"}
+      </h2>
 
       <form
         onSubmit={handleSubmit}
@@ -109,7 +111,6 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           className="border p-2 rounded"
         />
-
         {/* Show display name input only for new users */}
         {!isChecked && (
           <input
@@ -120,22 +121,15 @@ const Login = () => {
             className="border p-2 rounded"
           />
         )}
-
         <button
           type="submit"
           className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
         >
-          Login / Create Account
+          {isChecked ? "Login" : "Signup"}
         </button>
-
-        <label>
-          <input
-            type="checkbox"
-            checked={isChecked}
-            onChange={handleCheckboxChange}
-          />
-          Already a user ?.
-        </label>
+        <button checked={isChecked} onClick={handleCheckboxChange}>
+          {isChecked ? "Signup ?" : "Login ?"}
+        </button>
       </form>
 
       <p className="text-gray-600">{status}</p>
