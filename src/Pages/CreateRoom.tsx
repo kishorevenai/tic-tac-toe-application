@@ -83,6 +83,25 @@ function PrivateRoom() {
     }
   }
 
+  async function updateWinStatus(won: boolean) {
+    if (!session) return;
+
+    try {
+      await client.writeStorageObjects(session, [
+        {
+          collection: "player_stats",
+          key: "match_result",
+          value: { won, timestamp: Date.now() },
+          permission_read: 2, // public read
+          permission_write: 1, // owner write
+        },
+      ]);
+      console.log("Win status updated:", won);
+    } catch (error) {
+      console.error("Failed to update win status:", error);
+    }
+  }
+
   useEffect(() => {
     init();
 
@@ -107,13 +126,21 @@ function PrivateRoom() {
     if (gameWinner) {
       setWinner(gameWinner);
       setGameOver(true);
-      setStatus("You Won! 🎉");
+      if (gameWinner === mySymbol) {
+        setStatus("You Won! 🎉");
+        updateWinStatus(true);
+      } else {
+        setStatus("Opponent Won!");
+        updateWinStatus(false);
+      }
     } else if (isBoardFull(newBoard)) {
       setGameOver(true);
       setStatus("It's a Draw!");
+      updateWinStatus(false);
     } else {
       setStatus("Opponent's Turn");
       setWhosNext("O");
+      updateWinStatus(false);
     }
 
     // Send the move to opponent

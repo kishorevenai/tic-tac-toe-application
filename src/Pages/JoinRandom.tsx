@@ -123,6 +123,25 @@ function RandomRoom() {
     }
   }
 
+  async function updateWinStatus(won: boolean) {
+    if (!sessionRef.current) return;
+
+    try {
+      await client.writeStorageObjects(sessionRef.current, [
+        {
+          collection: "player_stats",
+          key: "match_result",
+          value: { won, timestamp: Date.now() },
+          permission_read: 2, // public read
+          permission_write: 1, // owner write
+        },
+      ]);
+      console.log("Win status updated:", won);
+    } catch (error) {
+      console.error("Failed to update win status:", error);
+    }
+  }
+
   useEffect(() => {
     init();
 
@@ -161,6 +180,13 @@ function RandomRoom() {
     if (gameWinner) {
       setGameOver(true);
       setStatus("You Won! 🎉");
+      if (gameWinner === mySymbol) {
+        setStatus("You Won! 🎉");
+        updateWinStatus(true);
+      } else {
+        setStatus("Opponent Won!");
+        updateWinStatus(false);
+      }
     } else if (isBoardFull(newBoard)) {
       setGameOver(true);
       setStatus("It's a Draw!");
