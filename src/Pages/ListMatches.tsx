@@ -1,21 +1,31 @@
 import { useEffect, useState } from "react";
 import client, { createSession } from "../nakamaClient";
+import { useNavigate } from "react-router-dom";
 
 function AvailableRooms() {
+  const navigate = useNavigate();
+
   const [matches, setMatches] = useState([]);
   const [error, setError] = useState("");
+
+  const handleJoinRoom = (roomId: string, count) => {
+    if (count === 2) {
+      alert("The Room is Full");
+      return;
+    }
+
+    navigate(`/join-room/${roomId}`);
+  };
 
   useEffect(() => {
     async function fetchMatches() {
       try {
-        // Authenticate
         const s = await createSession(
           "player_" + Math.floor(Math.random() * 10000)
         );
 
-        // List matches
         const limit = 10;
-        const authoritative = false; // only works if your match is authoritative (has server handler)
+        const authoritative = false;
         const label = undefined;
         const minPlayers = 0;
         const maxPlayers = 10;
@@ -48,9 +58,9 @@ function AvailableRooms() {
       {matches.length === 0 ? (
         <p>No active rooms found.</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-2 border-2 border-white">
           {matches.map((match) => (
-            <li key={match.match_id} className="border p-2 rounded">
+            <div key={match.match_id} className="rounded border-white">
               <p>
                 <strong>Room ID:</strong> {match.match_id}
               </p>
@@ -60,7 +70,12 @@ function AvailableRooms() {
               <p>
                 <strong>Max Players:</strong> {match.max_size}
               </p>
-            </li>
+              <button
+                onClick={() => handleJoinRoom(match.match_id, match.size)}
+              >
+                JOIN ROOM
+              </button>
+            </div>
           ))}
         </ul>
       )}

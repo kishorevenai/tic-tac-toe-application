@@ -46,8 +46,6 @@ function JoinRoom() {
 
       socket.onmatchdata = (matchData: any) => {
         console.log("COMING DATA", matchData);
-        console.log("LOCAL DATA", sessionRef.current);
-        console.log("LOCAL DATA 2", userSession);
         if (matchData.presence.username === sessionRef?.current.username) {
           console.log("Ignoring own message");
           return;
@@ -111,6 +109,7 @@ function JoinRoom() {
   }, []);
 
   const handleClick = (index: number) => {
+    console.log("HAIIIIII");
     console.log(board[index]);
     if (!matchRef.current || !socketRef.current || board[index] || gameOver)
       return;
@@ -187,7 +186,7 @@ function JoinRoom() {
               backgroundColor: cell ? "#e0e0e0" : "white",
               color: cell === "X" ? "red" : cell === "O" ? "blue" : "black",
             }}
-            disabled={whosNext === "O" || gameOver}
+            disabled={whosNext === "X" || gameOver}
           >
             {cell}
           </button>
