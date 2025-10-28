@@ -25,7 +25,7 @@ function JoinRoom() {
   const matchRef = useRef<any>(null);
 
   const handleRouteToHome = () => {
-    navigate("/");
+    navigate("/dashboard");
   };
 
   async function init() {
