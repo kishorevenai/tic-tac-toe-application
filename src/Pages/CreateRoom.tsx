@@ -89,7 +89,7 @@ function PrivateRoom() {
       matchRef.current = match.match_id;
       setMySymbol("X");
       // setWhosNext("X");
-      setStatus(`Match Created!`);
+      setStatus(`Match Created! Waiting for opponent to join...`);
     } catch (error) {
       console.error("Error creating match:", error);
       setStatus("Failed to create match");
