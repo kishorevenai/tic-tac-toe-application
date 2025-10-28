@@ -201,6 +201,7 @@ function JoinRoom() {
       >
         {board.map((cell, i) => (
           <button
+            className="rounded"
             key={i}
             onClick={() => handleClick(i)}
             style={{
