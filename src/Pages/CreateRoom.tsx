@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import client, { createSession } from "../nakamaClient";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, type Session } from "react-router-dom";
 import { calculateWinner, isBoardFull } from "../utils/gameUtils"; // Adjust path as needed
 
 function PrivateRoom() {
@@ -21,7 +21,7 @@ function PrivateRoom() {
   const matchRef = useRef<any>(null);
 
   const handleRouteToHome = () => {
-    navigate("/");
+    navigate("/dashboard");
   };
 
   async function init() {
@@ -32,13 +32,14 @@ function PrivateRoom() {
       setSession(userSession);
       setStatus("Authenticated...");
 
+      console.log("CHECKING FIRST BOTH", userSession);
+      console.log("CHECKING SECOND BOTH", JSON.parse(session));
+
       const socket = client.createSocket(false, false);
       await socket.connect(userSession, true);
       socketRef.current = socket;
 
       socket.onmatchdata = (matchData: any) => {
-        console.log("Received match data", matchData);
-
         const decoder = new TextDecoder();
         const dataString = decoder.decode(matchData.data);
         const { board: opponentBoard } = JSON.parse(dataString);
@@ -63,7 +64,6 @@ function PrivateRoom() {
       };
 
       socket.onmatchpresence = (presence: any) => {
-        console.log("SOMEONE JOINED", presence);
         if (presence.joins && presence.joins.length > 0) {
           // Small delay to ensure joiner is ready
           setTimeout(() => {
@@ -74,7 +74,7 @@ function PrivateRoom() {
 
       // Create match WITHOUT passing any name parameter
       const match = await socket.createMatch();
-      console.log("MATCH CREATED", match);
+
       matchRef.current = match.match_id;
       setMySymbol("X");
       setWhosNext("X");
@@ -89,18 +89,57 @@ function PrivateRoom() {
     if (!session) return;
 
     try {
+      const userSession = JSON.parse(
+        localStorage.getItem("nakamaSession") || "{}"
+      );
+      const username =
+        userSession.username || userSession.user_id || "unknown_player";
+
+      const result = await client.readStorageObjects(session, {
+        object_ids: [
+          {
+            collection: "player_stats",
+            key: "match_stats",
+            user_id: session.user_id,
+          },
+        ],
+      });
+
+      let stats = { wins: 0, totalMatches: 0 };
+
+      if (
+        result.objects &&
+        result.objects.length > 0 &&
+        result.objects[0].value &&
+        typeof result.objects[0].value === "object" &&
+        "wins" in result.objects[0].value &&
+        "totalMatches" in result.objects[0].value
+      ) {
+        stats = result.objects[0].value as {
+          wins: number;
+          user_id: string;
+          totalMatches: number;
+        };
+      }
+
+      // Update stats
+      stats.totalMatches += 1;
+      if (won) stats.wins += 1;
+
+      // Save updated stats
       await client.writeStorageObjects(session, [
         {
           collection: "player_stats",
-          key: "match_result",
-          value: { won, timestamp: Date.now() },
-          permission_read: 2, // public read
-          permission_write: 1, // owner write
+          key: "match_stats",
+          value: { ...stats, username },
+          permission_read: 2,
+          permission_write: 1,
         },
       ]);
-      console.log("Win status updated:", won);
+
+      console.log("Updated player stats:", stats);
     } catch (error) {
-      console.error("Failed to update win status:", error);
+      console.error("Failed to update win stats:", error);
     }
   }
 
@@ -115,7 +154,6 @@ function PrivateRoom() {
   }, []);
 
   const handleClick = (index: number) => {
-    console.log(board[index]);
     if (!matchRef.current || !socketRef.current || board[index] || gameOver)
       return;
 
@@ -161,8 +199,6 @@ function PrivateRoom() {
           data: encodedData,
         },
       });
-
-      console.log("Move sent successfully");
     } catch (error) {
       setStatus("Failed to send your move");
     }
