@@ -8,7 +8,7 @@ function PrivateRoom() {
   const navigate = useNavigate();
 
   const [session, setSession] = useState<any>(
-    localStorage.getItem("nakamaSession")
+    JSON.parse(localStorage.getItem("nakamaSession") || "{}")
   );
   const [status, setStatus] = useState<any>(null);
   const [mySymbol, setMySymbol] = useState<string>("");
@@ -27,14 +27,14 @@ function PrivateRoom() {
   async function init() {
     try {
       console.log("CHECKING RESULT ======>", whosNext);
-      const userSession: any = await createSession(
-        "player_" + Math.floor(Math.random() * 10000)
-      );
-      setSession(userSession);
+      // const userSession: any = await createSession(
+      //   "player_" + Math.floor(Math.random() * 10000)
+      // );
+      // setSession(userSession);
       setStatus("Authenticated...");
 
       const socket = client.createSocket(false, false);
-      await socket.connect(userSession, true);
+      await socket.connect(session, true);
       socketRef.current = socket;
 
       socket.onmatchdata = (matchData: any) => {
@@ -63,13 +63,17 @@ function PrivateRoom() {
 
       socket.onmatchpresence = (presence: any) => {
         console.log("PRESENCE EVENT", presence);
-        if (presence.joins && presence.joins.length > 1) {
+        if (presence.joins && presence.joins.length > 0) {
           console.log("JOIN EVENT COMING", presence);
-          // Small delay to ensure joiner is ready
-          setTimeout(() => {
-            // setWhosNext("X");
-            setStatus("Opponent joined! Your turn (X)");
-          }, 500);
+          let comingUsername = presence.joins[0].username;
+          let currentUsername = session.username;
+
+          if (comingUsername !== currentUsername) {
+            setTimeout(() => {
+              setWhosNext("X");
+              setStatus("Opponent joined! Your turn (X)");
+            }, 500);
+          }
         }
 
         if (presence.leaves && presence.leaves.length > 0) {
@@ -79,6 +83,7 @@ function PrivateRoom() {
       };
 
       // Create match WITHOUT passing any name parameter
+      console.log(session);
       const match = await socket.createMatch();
 
       matchRef.current = match.match_id;

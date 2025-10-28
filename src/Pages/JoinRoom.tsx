@@ -74,7 +74,10 @@ function JoinRoom() {
       };
 
       socket.onmatchpresence = (presence: any) => {
-        console.log("Match presence updated", presence);
+        if (presence.leaves && presence.leaves.length > 0) {
+          setStatus("Opponent left the game 😢");
+          setGameOver(true);
+        }
       };
 
       await socket.connect(JSON.parse(session), true);
