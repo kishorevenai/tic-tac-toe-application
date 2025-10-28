@@ -134,12 +134,15 @@ const Login = () => {
 
     //   <p className="text-gray-600">{status}</p>
     // </div>
-    <div className="w-full h-full flex justify-center items-center">
-      <form className="h-[500px]">
-        <h1 className="h1-prim">Player Login</h1>
-        <p className="span">Welcome back to Tic-Tac-Toe Pro</p>
+    <div className="w-full h-[100vh] flex justify-center items-center px-5">
+      <form onSubmit={handleSubmit} className="h-[500px]">
+        <h1 className="text-[20px] sm:text-[20px] md:text-[100px]">
+          Player Login
+        </h1>
 
-        <div className="flex flex-col">
+        <p className="span mb-5">Welcome back to Tic-Tac-Toe Pro</p>
+        <p className="text-gray-600">{status}</p>
+        <div className="flex flex-col gap-1 mb-2">
           <label htmlFor="email">Email:</label>
 
           <input
@@ -151,8 +154,7 @@ const Login = () => {
             className="p-input"
           />
         </div>
-
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-1 mb-2">
           <label htmlFor="password">Password:</label>
 
           <input
@@ -163,6 +165,33 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="p-input"
           />
+        </div>
+        {!isChecked && (
+          <div className="flex flex-col gap-1 mb-2">
+            <label htmlFor="displayname">Display Name:</label>
+            <input
+              id="displayname"
+              type="text"
+              placeholder="Display Name"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="p-input"
+            />
+          </div>
+        )}
+
+        <div className="flex gap-5">
+          <button type="submit" className="p-button">
+            {isChecked ? "Login" : "Signup"}
+          </button>
+
+          <button
+            className="s-button"
+            checked={isChecked}
+            onClick={handleCheckboxChange}
+          >
+            {isChecked ? "Signup ?" : "Login ?"}{" "}
+          </button>
         </div>
       </form>
     </div>

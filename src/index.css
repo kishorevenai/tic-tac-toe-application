@@ -10,7 +10,7 @@ body {
 }
 
 @layer components {
-  .h1-prim {
+  .p-h1 {
     @apply text-[100px] font-bold;
   }
 
@@ -20,5 +20,13 @@ body {
 
   .p-input {
     @apply bg-gray-800 text-white p-2 rounded-md w-full border h-[60px];
+  }
+
+  .p-button {
+    @apply bg-blue-500 text-white py-2 rounded hover:bg-blue-600 px-3;
+  }
+
+  .s-button {
+    @apply bg-blue-400 text-white py-2 rounded hover:bg-blue-600 px-3;
   }
 }
