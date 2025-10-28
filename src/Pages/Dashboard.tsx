@@ -28,7 +28,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-10 w-[60%] max-w-[1000px] min-w-[300px]">
+    <div className="p-10 w-[60%] max-w-[1000px] min-w-[300px] mx-auto">
       <h2 className="text-[20x] sm:text-[20px] md:text-[50px]">
         Tic Tac Toe Multiplayer
       </h2>
