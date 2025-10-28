@@ -18,6 +18,10 @@ body {
     @apply text-[20px];
   }
 
+  .span-md {
+    @apply text-[16px];
+  }
+
   .p-input {
     @apply bg-gray-800 text-white p-2 rounded-md w-full border h-[60px];
   }

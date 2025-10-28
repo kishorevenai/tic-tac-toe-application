@@ -28,36 +28,51 @@ const Dashboard = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Tic Tac Toe Multiplayer</h2>
+    <div className="p-10 w-[60%] max-w-[1000px] min-w-[300px]">
+      <h2 className="text-[20x] sm:text-[20px] md:text-[50px]">
+        Tic Tac Toe Multiplayer
+      </h2>
 
-      <div style={{ marginBottom: "30px" }}>
-        <h3>Create a New Game</h3>
-        <button onClick={handleCreateRoom}>Create Room</button>
-        <p>Click to create a room and get a match ID to share</p>
+      <div className="mb-5 border-b pb-5">
+        <h3 className="text-[20px] mb-5">Create a New Game:</h3>
+        <p className="span mb-2">
+          Click to create a room and get a match ID to share
+        </p>
+        <button className="p-button" onClick={handleCreateRoom}>
+          Create Room
+        </button>
       </div>
 
-      <div>
-        <h3>Join Existing Game</h3>
-        <label htmlFor="joinRoomId">Match ID: </label>
+      <div className="mb-5 border-b pb-5">
+        <h3 className="span mb-2">Join Existing Game:</h3>
+        <label className="mb-3" htmlFor="joinRoomId">
+          Match ID:{" "}
+        </label>
         <input
+          className="p-input mb-3"
           value={joinRoomId}
           id="joinRoomId"
           placeholder="Paste Match ID here"
           onChange={(e) => setJoinRoomId(e.target.value)}
           style={{ marginRight: "10px", padding: "5px" }}
         />
-        <button onClick={handleJoinRoom}>Join Room</button>
+        <button className="p-button" onClick={handleJoinRoom}>
+          Join Room
+        </button>
       </div>
 
-      <div>
-        <h3>Join Random</h3>
-        <button onClick={handleRandomRoom}>Join Random Room</button>
+      <div className="mb-5 border-b pb-5">
+        <h3 className="span-md mb-2">Join Random:</h3>
+        <button className="p-button" onClick={handleRandomRoom}>
+          Join Random Room
+        </button>
       </div>
 
-      <div>
-        <h3>List Rooms</h3>
-        <button onClick={handleListMatches}>List all Room</button>
+      <div className="mb-5 border-b pb-5">
+        <h3 className="span-md mb-2">List Rooms:</h3>
+        <button className="p-button" onClick={handleListMatches}>
+          List all Rooms
+        </button>
       </div>
     </div>
   );

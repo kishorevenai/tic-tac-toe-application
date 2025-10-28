@@ -7,17 +7,23 @@ import AutoMatchmaking from "./Pages/JoinRandom";
 import ListMatches from "./Pages/ListMatches";
 import Login from "./Pages/Login";
 import Authenticate from "./utils/authenticate";
+import Layout from "./Components/Layout";
 
 function App() {
   return (
     <Routes>
       <Route element={<Authenticate />}>
         <Route index element={<Login />}></Route>
-        <Route path={"/dashboard"} element={<Dashboard />}></Route>
-        <Route path={"/private-room/:id"} element={<PrivateRoom />}></Route>
-        <Route path={"/join-room/:id"} element={<JoinRoom />}></Route>
-        <Route path={"/random-room/:id"} element={<AutoMatchmaking />}></Route>
-        <Route path={"/list-rooms"} element={<ListMatches />}></Route>
+        <Route element={<Layout />}>
+          <Route path={"/dashboard"} element={<Dashboard />}></Route>
+          <Route path={"/private-room/:id"} element={<PrivateRoom />}></Route>
+          <Route path={"/join-room/:id"} element={<JoinRoom />}></Route>
+          <Route
+            path={"/random-room/:id"}
+            element={<AutoMatchmaking />}
+          ></Route>
+          <Route path={"/list-rooms"} element={<ListMatches />}></Route>
+        </Route>
       </Route>
     </Routes>
   );
