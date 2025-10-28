@@ -26,14 +26,12 @@ function PrivateRoom() {
 
   async function init() {
     try {
+      console.log("CHECKING RESULT ======>", whosNext);
       const userSession: any = await createSession(
         "player_" + Math.floor(Math.random() * 10000)
       );
       setSession(userSession);
       setStatus("Authenticated...");
-
-      console.log("CHECKING FIRST BOTH", userSession);
-      console.log("CHECKING SECOND BOTH", JSON.parse(session));
 
       const socket = client.createSocket(false, false);
       await socket.connect(userSession, true);
@@ -64,11 +62,19 @@ function PrivateRoom() {
       };
 
       socket.onmatchpresence = (presence: any) => {
-        if (presence.joins && presence.joins.length > 0) {
+        console.log("PRESENCE EVENT", presence);
+        if (presence.joins && presence.joins.length > 1) {
+          console.log("JOIN EVENT COMING", presence);
           // Small delay to ensure joiner is ready
           setTimeout(() => {
+            // setWhosNext("X");
             setStatus("Opponent joined! Your turn (X)");
           }, 500);
+        }
+
+        if (presence.leaves && presence.leaves.length > 0) {
+          setStatus("Opponent left the game 😢");
+          setGameOver(true);
         }
       };
 
@@ -77,8 +83,8 @@ function PrivateRoom() {
 
       matchRef.current = match.match_id;
       setMySymbol("X");
-      setWhosNext("X");
-      setStatus(`Match Created! Share this ID: ${match.match_id}`);
+      // setWhosNext("X");
+      setStatus(`Match Created!`);
     } catch (error) {
       console.error("Error creating match:", error);
       setStatus("Failed to create match");
@@ -157,6 +163,8 @@ function PrivateRoom() {
     if (!matchRef.current || !socketRef.current || board[index] || gameOver)
       return;
 
+    if (whosNext !== mySymbol) return;
+
     const newBoard = [...board];
     newBoard[index] = mySymbol;
     setBoard(newBoard);
@@ -210,7 +218,9 @@ function PrivateRoom() {
         <p className="text-gray-50 font-bold span">{status}</p>
         <p className="span border p-2 ">ROOM ID: {matchRef.current}</p>
         {gameOver && (
-          <button className="p-button" onClick={handleRouteToHome}>Back to home page</button>
+          <button className="p-button" onClick={handleRouteToHome}>
+            Back to home page
+          </button>
         )}
       </div>
 
@@ -240,7 +250,7 @@ function PrivateRoom() {
               backgroundColor: cell ? "#e0e0e0" : "white",
               color: cell === "X" ? "red" : cell === "O" ? "blue" : "black",
             }}
-            disabled={whosNext === "O" || gameOver}
+            disabled={whosNext !== mySymbol || gameOver || !whosNext}
           >
             {cell}
           </button>
