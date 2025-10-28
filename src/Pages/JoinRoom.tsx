@@ -176,15 +176,18 @@ function JoinRoom() {
   };
 
   return (
-    <div style={{ textAlign: "center", fontFamily: "sans-serif" }}>
-      <h1>Tic Tac Toe</h1>
-      <p>{status}</p>
-      <p>Next to play: {whosNext}</p>
-      {gameOver && (
-        <button onClick={handleRouteToHome}>Back to home page</button>
-      )}
+    <div className="mt-10">
+      <div className="flex justify-between items-center gap-10 w-[90%] m-auto">
+        <p className="text-gray-50 font-bold span">{status}</p>
+        <p className="span">Next to play: {whosNext}</p>
+        {gameOver && (
+          <button className="p-button" onClick={handleRouteToHome}>
+            Back to home page
+          </button>
+        )}
+      </div>
       {mySymbol && (
-        <p>
+        <p className="span w-[90%] mx-auto">
           You are: <strong>{mySymbol}</strong>
         </p>
       )}

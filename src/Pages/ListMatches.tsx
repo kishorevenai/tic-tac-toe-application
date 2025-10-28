@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import client, { createSession } from "../nakamaClient";
 import { useNavigate } from "react-router-dom";
+import DataTable from "../Components/Table";
 
 function AvailableRooms() {
   const navigate = useNavigate();
@@ -53,9 +54,10 @@ function AvailableRooms() {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Available Rooms</h2>
+      <DataTable rows={matches} joinFunc={handleJoinRoom} />
+      {/* <h2 className="text-xl font-semibold mb-4">Available Rooms</h2> */}
       {error && <p className="text-red-500">{error}</p>}
-      {matches.length === 0 ? (
+      {/* {matches.length === 0 ? (
         <p>No active rooms found.</p>
       ) : (
         <ul className="space-y-2 border-2 border-white">
@@ -78,7 +80,7 @@ function AvailableRooms() {
             </div>
           ))}
         </ul>
-      )}
+      )} */}
     </div>
   );
 }

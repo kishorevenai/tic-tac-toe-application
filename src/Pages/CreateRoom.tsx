@@ -205,33 +205,36 @@ function PrivateRoom() {
   };
 
   return (
-    <div style={{ textAlign: "center", fontFamily: "sans-serif" }}>
-      <h1>Tic Tac Toe</h1>
-      <p>{status}</p>
-      <p>ROOM ID: {matchRef.current}</p>
-      {gameOver && (
-        <button onClick={handleRouteToHome}>Back to home page</button>
-      )}
+    <div className="mt-10">
+      <div className="flex justify-between items-center gap-10 w-[90%] m-auto">
+        <p className="text-gray-50 font-bold span">{status}</p>
+        <p className="span border p-2 ">ROOM ID: {matchRef.current}</p>
+        {gameOver && (
+          <button className="p-button" onClick={handleRouteToHome}>Back to home page</button>
+        )}
+      </div>
+
       {mySymbol && (
-        <p>
+        <p className="span w-[90%] mx-auto">
           You are: <strong>{mySymbol}</strong>
         </p>
       )}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, 100px)",
+          gridTemplateColumns: "repeat(3,200px)",
           gap: "5px",
           justifyContent: "center",
         }}
       >
         {board.map((cell, i) => (
           <button
+            className="rounded"
             key={i}
             onClick={() => handleClick(i)}
             style={{
-              width: "100px",
-              height: "100px",
+              width: "200px",
+              height: "200px",
               fontSize: "2rem",
               cursor: "pointer",
               backgroundColor: cell ? "#e0e0e0" : "white",

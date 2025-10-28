@@ -214,9 +214,7 @@ function RandomRoom() {
   };
 
   return (
-    <div
-      style={{ textAlign: "center", fontFamily: "sans-serif", padding: "20px" }}
-    >
+    <div className="p-[20px]">
       <h1>Tic Tac Toe - Random Match</h1>
       <p style={{ fontSize: "1.2rem", fontWeight: "bold" }}>{status}</p>
 
