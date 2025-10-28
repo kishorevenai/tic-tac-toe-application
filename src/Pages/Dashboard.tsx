@@ -1,9 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { MyContext } from "../store/nakamaContext";
 
 const Dashboard = () => {
+  const { user } = useContext(MyContext);
   const navigate = useNavigate();
   const [joinRoomId, setJoinRoomId] = useState<string>("");
+
+  console.log("checking result", user);
 
   const handleJoinRoom = () => {
     if (joinRoomId.trim()) {

@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import client, { createSession } from "../nakamaClient";
 import { useParams, useNavigate, type Session } from "react-router-dom";
 import { calculateWinner, isBoardFull } from "../utils/gameUtils"; // Adjust path as needed
+import { MyContext } from "../store/nakamaContext";
 
 function PrivateRoom() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user }: any = useContext(MyContext);
 
-  const [session, setSession] = useState<any>(
-    JSON.parse(localStorage.getItem("nakamaSession") || "{}")
-  );
+  const [session, setSession] = useState<any>(user);
+
+  console.log(session, user);
   const [status, setStatus] = useState<any>(null);
   const [mySymbol, setMySymbol] = useState<string>("");
   const [whosNext, setWhosNext] = useState<string>("");
@@ -100,9 +102,7 @@ function PrivateRoom() {
     if (!session) return;
 
     try {
-      const userSession = JSON.parse(
-        localStorage.getItem("nakamaSession") || "{}"
-      );
+      const userSession = user;
       const username =
         userSession.username || userSession.user_id || "unknown_player";
 

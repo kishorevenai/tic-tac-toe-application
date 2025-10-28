@@ -1,24 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import client from "../nakamaClient";
 import { useNavigate } from "react-router-dom";
 
+import { MyContext } from "../store/nakamaContext";
+
 const Login = () => {
+  const { user, setUser }: any = useContext(MyContext);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
   const [displayName, setDisplayName] = useState<string>("");
-  const [existingUser, setExistingUser] = useState(false); // track if user exists
+
   const [isChecked, setIsChecked] = useState(true);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     // Optional: restore session if token exists
-    const token = localStorage.getItem("nakamaToken");
+    const token = user || localStorage.getItem("nakamaToken");
     if (!token) return;
 
     try {
-      const restoredSession = client.restoreSession(token);
+      const restoredSession = client.sessionRefresh(token);
       if (restoredSession && !restoredSession.isexpired(Date.now() / 1000)) {
         fetchExistingUserData(restoredSession);
       }
@@ -32,7 +36,6 @@ const Login = () => {
       const account = await client.getAccount(session);
       if (account.display_name) {
         setDisplayName(account.display_name);
-        setExistingUser(true); // mark as existing user
       }
     } catch (err) {
       console.log("No existing user data", err);
@@ -58,11 +61,14 @@ const Login = () => {
         await client.updateAccount(session, { display_name: displayName });
       }
 
+      setUser(session);
+
       // Don't overwrite display name if existing
       localStorage.setItem("nakamaSession", JSON.stringify(session));
       localStorage.setItem("nakamaToken", session.token);
+
       setStatus("Login successful!");
-      setExistingUser(true); // mark as existing user
+
       navigate("/dashboard");
       return session;
     } catch (error) {

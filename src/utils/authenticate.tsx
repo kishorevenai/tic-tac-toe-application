@@ -1,16 +1,18 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
+import { MyContext } from "../store/nakamaContext";
 
 const Authenticate: React.FC = () => {
   const navigate = useNavigate();
+  const data = useContext(MyContext);
+
+  const token = localStorage.getItem("nakamaSession");
 
   useEffect(() => {
-    const token = localStorage.getItem("nakamaSession");
-
-    if (!token) {
+    if (!token || !data?.user) {
       navigate("/", { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, data, token]);
 
   return <Outlet />;
 };

@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import client, { createSession } from "../nakamaClient";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { calculateWinner, isBoardFull } from "../utils/gameUtils"; // Adjust path as needed
+import { MyContext } from "../store/nakamaContext";
 
 function JoinRoom() {
+  const { user }: any = useContext(MyContext);
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [session, setSession] = useState<any>(
-    localStorage.getItem("nakamaSession")
-  );
+  const [session, setSession] = useState<any>(user);
   const [status, setStatus] = useState<any>(null);
   const [mySymbol, setMySymbol] = useState<string>("");
   const [whosNext, setWhosNext] = useState<string>("");
@@ -21,7 +21,6 @@ function JoinRoom() {
   const socketRef = useRef<any>(null);
   const sessionRef = useRef<any>(null);
 
-  console.log(whosNext);
   const matchRef = useRef<any>(null);
 
   const handleRouteToHome = () => {
@@ -30,30 +29,17 @@ function JoinRoom() {
 
   async function init() {
     try {
-      const userSession: any = await createSession(
-        "player_" + Math.floor(Math.random() * 10000)
-      );
-      setSession(userSession);
-      sessionRef.current = userSession;
-
       setStatus("Authenticated...");
 
       const socket = client.createSocket(false, false);
 
       socket.onmatchdata = (matchData: any) => {
         console.log("COMING DATA", matchData);
-        if (matchData.presence.username === sessionRef?.current.username) {
-          console.log("Ignoring own message");
-          return;
-        }
-
-        // Decode and update board when opponent moves
         const decoder = new TextDecoder();
         const dataString = decoder.decode(matchData.data);
         const { board: opponentBoard } = JSON.parse(dataString);
         setBoard(opponentBoard);
 
-        // Check for winner after opponent's move
         const gameWinner = calculateWinner(opponentBoard);
         if (gameWinner) {
           setWinner(gameWinner);
@@ -80,10 +66,9 @@ function JoinRoom() {
         }
       };
 
-      await socket.connect(JSON.parse(session), true);
+      await socket.connect(session, true);
       socketRef.current = socket;
 
-      // Use the ID from URL params directly
       console.log("Attempting to join match:", id);
       const match = await socket.joinMatch(id);
       console.log("Joined Match:", match);
@@ -106,8 +91,8 @@ function JoinRoom() {
           collection: "player_stats",
           key: "match_result",
           value: { won, timestamp: Date.now() },
-          permission_read: 2, // public read
-          permission_write: 1, // owner write
+          permission_read: 2,
+          permission_write: 1,
         },
       ]);
       console.log("Win status updated:", won);
