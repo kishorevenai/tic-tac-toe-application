@@ -88,51 +88,83 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-4">
-      <h2 className="text-2xl font-semibold">
-        {isChecked ? "Login" : "Signup"}
-      </h2>
+    // <div className="flex flex-col items-center justify-center h-screen gap-4">
+    //   <h2 className="text-2xl font-semibold">
+    //     {isChecked ? "Login" : "Signup"}
+    //   </h2>
 
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-3 p-4 bg-gray-100 rounded-lg w-80"
-      >
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border p-2 rounded"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="border p-2 rounded"
-        />
-        {/* Show display name input only for new users */}
-        {!isChecked && (
+    //   <form
+    //     onSubmit={handleSubmit}
+    //     className="flex flex-col gap-3 p-4 bg-gray-100 rounded-lg w-80"
+    //   >
+    //     <input
+    //       type="email"
+    //       placeholder="Email"
+    //       value={email}
+    //       onChange={(e) => setEmail(e.target.value)}
+    //       className="border p-2 rounded"
+    //     />
+    //     <input
+    //       type="password"
+    //       placeholder="Password"
+    //       value={password}
+    //       onChange={(e) => setPassword(e.target.value)}
+    //       className="border p-2 rounded"
+    //     />
+    //     {/* Show display name input only for new users */}
+    //     {!isChecked && (
+    //       <input
+    //         type="text"
+    //         placeholder="Display Name"
+    //         value={displayName}
+    //         onChange={(e) => setDisplayName(e.target.value)}
+    //         className="border p-2 rounded"
+    //       />
+    //     )}
+    //     <button
+    //       type="submit"
+    //       className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+    //     >
+    //       {isChecked ? "Login" : "Signup"}
+    //     </button>
+    //     <button checked={isChecked} onClick={handleCheckboxChange}>
+    //       {isChecked ? "Signup ?" : "Login ?"}
+    //     </button>
+    //   </form>
+
+    //   <p className="text-gray-600">{status}</p>
+    // </div>
+    <div className="w-full h-full flex justify-center items-center">
+      <form className="h-[500px]">
+        <h1 className="h1-prim">Player Login</h1>
+        <p className="span">Welcome back to Tic-Tac-Toe Pro</p>
+
+        <div className="flex flex-col">
+          <label htmlFor="email">Email:</label>
+
           <input
-            type="text"
-            placeholder="Display Name"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            className="border p-2 rounded"
+            id="email"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="p-input"
           />
-        )}
-        <button
-          type="submit"
-          className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-        >
-          {isChecked ? "Login" : "Signup"}
-        </button>
-        <button checked={isChecked} onClick={handleCheckboxChange}>
-          {isChecked ? "Signup ?" : "Login ?"}
-        </button>
-      </form>
+        </div>
 
-      <p className="text-gray-600">{status}</p>
+        <div className="flex flex-col">
+          <label htmlFor="password">Password:</label>
+
+          <input
+            id="password"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="p-input"
+          />
+        </div>
+      </form>
     </div>
   );
 };
