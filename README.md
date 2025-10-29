@@ -34,3 +34,49 @@ docker compose up
 ```
 
 
+
+## Usage Instructions
+
+Once the frontend and Nakama backend are running, follow these steps:
+
+1. Sign Up / Log In
+
+Open the frontend in a browser.
+
+Sign up with a username and password (or log in if already registered).
+
+Nakama handles authentication and session management.
+
+2. Create a Room
+
+After logging in, click “Create Room” to start a new Tic Tac Toe game.
+
+The created room appears in the list of available rooms.
+
+Share the room ID with a friend if you want them to join directly.
+
+3. Join a Room
+
+You can join a game in three ways:
+
+Join a specific room
+
+Enter the room ID shared by another player.
+
+Join a random room
+
+Click “Join Random” to be matched with any available room waiting for a second player.
+
+Wait for other players
+
+Rooms remain in the list until someone joins.
+
+4. Playing the Game
+
+Once two players are in a room, the game starts automatically.
+
+Players take turns placing X or O in the Tic Tac Toe grid.
+
+The winner is determined by Nakama backend, which synchronizes moves in real time.
+
+
