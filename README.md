@@ -13,6 +13,16 @@ Before starting, ensure you have the following installed:
 
 ---
 
+
+
+## frontend URL
+http://13.203.222.65:5173
+
+## backend URL
+Please clone the nakama repository, and run them locally, the backend was unable to be hosted as there are some restrictions from the nakama.
+
+Please make sure the nakama backend is running locally before accessing the frontend URL. (no need to follow if both the frontend and the backend running locally).
+
 ## Setup Instructions
 
 ### 1. Clone and Run Frontend
